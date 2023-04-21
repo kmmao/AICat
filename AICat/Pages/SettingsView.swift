@@ -22,6 +22,10 @@ struct SettingsView: View {
     @State var apiHostError: AFError?
     @State var showApiHostAlert = false
 
+    @EnvironmentObject var appStateVM: AICatStateViewModel
+
+    @State var toast: Toast?
+
     var appVersion: String {
         Bundle.main.releaseVersion ?? "1.0"
     }
@@ -42,7 +46,7 @@ struct SettingsView: View {
                         .aspectRatio(contentMode: .fit)
                         .frame(width: 16, height: 16)
                 }
-                .tint(.primary)
+                .tint(.primaryColor)
                 Spacer()
                 VStack(spacing: 0) {
                     Text("Settings")
@@ -60,104 +64,112 @@ struct SettingsView: View {
             .frame(height: 44)
             #endif
             List {
-                Section("API Key") {
-                    HStack {
-                        SecureField(text: $apiKey) {
-                            Text("Enter API key")
-                        }
-                        if !apiKey.isEmpty {
-                            Button(action: {
-                                apiKey = ""
-                            }) {
-                                Image(systemName: "multiply.circle.fill")
+                if appStateVM.developMode {
+                    Section("API Key") {
+                        HStack {
+                            SecureField(text: $apiKey) {
+                                Text("Enter API key")
                             }
-                            .tint(.gray)
-                            .buttonStyle(.borderless)
-                        }
-                    }
-                    HStack(spacing: 8) {
-                        Button("Validate and save") {
-                            validateApiKey()
-                        }
-                        if isValidating {
-                            LoadingIndocator()
-                                .frame(width: 24, height: 14)
-                        }
-                        if error != nil {
-                            Image(systemName: "exclamationmark.triangle.fill")
-                                .foregroundColor(.red)
-                        }
-                        if isValidated {
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundColor(.green)
-                        }
-                    }
-                }
-                .alert(
-                    "Validate Failed",
-                    isPresented: $showApiKeyAlert,
-                    actions: {
-                        Button("OK", action: { showApiKeyAlert = false })
-                    },
-                    message: {
-                        Text("\(error?.localizedDescription ?? "")")
-                    }
-                )
-                Section("API HOST") {
-                    HStack {
-                        TextField(text: $apiHost) {
-                            Text("Enter api host")
-                        }
-                        if !apiHost.isEmpty {
-                            Button(action: {
-                                apiHost = ""
-                            }) {
-                                Image(systemName: "multiply.circle.fill")
+                            if !apiKey.isEmpty {
+                                Button(action: {
+                                    apiKey = ""
+                                }) {
+                                    Image(systemName: "multiply.circle.fill")
+                                }
+                                .tint(.gray)
+                                .buttonStyle(.borderless)
                             }
-                            .tint(.gray)
-                            .buttonStyle(.borderless)
                         }
+                        HStack(spacing: 8) {
+                            Button("Validate and Save") {
+                                validateApiKey()
+                            }
+                            if isValidating {
+                                LoadingIndocator()
+                                    .frame(width: 24, height: 14)
+                            }
+                            if error != nil {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .foregroundColor(.red)
+                            }
+                            if isValidated {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundColor(.green)
+                            }
+                        }
+                        Button("Delete", action: {
+                            apiKey = ""
+                            UserDefaults.openApiKey = nil
+                            toast = Toast(type: .success, message: "API Key deleted!")
+                        })
                     }
-                    HStack(spacing: 8) {
-                        Button("Validate and save") {
-                            validateApiHost()
+                    .alert(
+                        "Validate Failed!",
+                        isPresented: $showApiKeyAlert,
+                        actions: {
+                            Button("OK", action: { showApiKeyAlert = false })
+                        },
+                        message: {
+                            Text("\(error?.localizedDescription ?? "")")
                         }
-                        if isValidatingApiHost {
-                            LoadingIndocator()
-                                .frame(width: 24, height: 14)
+                    )
+                    Section("API HOST") {
+                        HStack {
+                            TextField(text: $apiHost) {
+                                Text("Enter api host")
+                            }
+                            if !apiHost.isEmpty {
+                                Button(action: {
+                                    apiHost = ""
+                                }) {
+                                    Image(systemName: "multiply.circle.fill")
+                                }
+                                .tint(.gray)
+                                .buttonStyle(.borderless)
+                            }
                         }
-                        if apiHostError != nil {
-                            Image(systemName: "exclamationmark.triangle.fill")
-                                .foregroundColor(.red)
+                        HStack(spacing: 8) {
+                            Button("Validate and Save") {
+                                validateApiHost()
+                            }
+                            if isValidatingApiHost {
+                                LoadingIndocator()
+                                    .frame(width: 24, height: 14)
+                            }
+                            if apiHostError != nil {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .foregroundColor(.red)
+                            }
+                            if isValidatedApiHost {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundColor(.green)
+                            }
+                            Spacer()
                         }
-                        if isValidatedApiHost {
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundColor(.green)
-                        }
-                        Spacer()
+                        Button("Reset", action: {
+                            apiHost = "https://api.openai.com"
+                            UserDefaults.resetApiHost()
+                            toast = Toast(type: .success, message: "ApiHost reset sucessfully!")
+                        })
                     }
-                    Button("Reset", action: {
-                        apiHost = "https://api.openai.com"
-                        UserDefaults.apiHost = "https://api.openai.com"
-                    })
+                    .alert(
+                        "Validate Failed!",
+                        isPresented: $showApiHostAlert,
+                        actions: {
+                            Button("OK", action: { showApiHostAlert = false })
+                        },
+                        message: {
+                            Text("\(apiHostError?.localizedDescription ?? "")")
+                        }
+                    )
                 }
-                .alert(
-                    "Validate Failed",
-                    isPresented: $showApiHostAlert,
-                    actions: {
-                        Button("OK", action: { showApiHostAlert = false })
-                    },
-                    message: {
-                        Text("\(apiHostError?.localizedDescription ?? "")")
-                    }
-                )
                 Section("support") {
                     Link(destination: URL(string: "https://learnprompting.org/")!) {
                         Label("Learn Prompting", systemImage: "book")
                             .labelStyle(.titleAndIcon)
                     }
                     Link(destination: URL(string: "https://github.com/f/awesome-chatgpt-prompts")!) {
-                        Label("Awesome chatgpt prompts", systemImage: "square.stack.3d.up")
+                        Label("Awesome prompts", systemImage: "square.stack.3d.up")
                             .labelStyle(.titleAndIcon)
                     }
                     Link(destination: URL(string: "mailto:iplay.coder@gmail.com")!){
@@ -168,13 +180,13 @@ struct SettingsView: View {
                         Label("Privacy and Policy", systemImage: "lock.rectangle.on.rectangle")
                             .labelStyle(.titleAndIcon)
                     }
-                }.tint(.primary)
+                }.tint(.primaryColor)
                 Section("Source Code") {
                     Link(destination: URL(string: "https://github.com/Panl/AICat.git")!){
                         Label("AICat.git", image: "github_icon")
                             .labelStyle(.titleAndIcon)
                     }
-                }.tint(.primary)
+                }.tint(.primaryColor)
                 Section("Social") {
                     Link(destination: URL(string: "https://t.me/aicatevents")!){
                         Label("AICat News", image: "telegram_icon")
@@ -188,7 +200,7 @@ struct SettingsView: View {
                         Label("Rego", image: "twitter_circled")
                             .labelStyle(.titleAndIcon)
                     }
-                }.tint(.primary)
+                }.tint(.primaryColor)
                 Section(
                     header: Text("More App"),
                     footer: HStack {
@@ -196,6 +208,17 @@ struct SettingsView: View {
                         Text("AICat \(appVersion)(\(buildNumber))")
                             .font(.manrope(size: 12, weight: .regular))
                             .padding(12)
+                            .gesture(
+                                LongPressGesture(minimumDuration: 5)
+                                    .onEnded { _ in
+                                        appStateVM.developMode.toggle()
+                                        if appStateVM.developMode {
+                                            toast = Toast(type: .info, message: "You are in Develper Mode, enter API key", duration: 4)
+                                        } else {
+                                            toast = Toast(type: .info, message: "You are in Normal Mode", duration: 4)
+                                        }
+                                    }
+                            )
                         Spacer()
                     }) {
                     Link(destination: URL(string: "https://apps.apple.com/app/epoch-music-toolkit/id1459345397")!) {
@@ -214,11 +237,12 @@ struct SettingsView: View {
                                     .foregroundColor(.gray)
                             }
                         }.padding(.vertical, 4)
-                    }.tint(.primary)
+                    }.tint(.primaryColor)
                 }
             }
             .background(Color.background)
             .font(.manrope(size: 16, weight: .medium))
+            .toast($toast)
         }
     }
 
@@ -267,5 +291,6 @@ struct SettingsView_Previews: PreviewProvider {
     static var previews: some View {
         SettingsView(onClose: {})
             .environment(\.colorScheme, .light)
+            .environmentObject(AICatStateViewModel())
     }
 }

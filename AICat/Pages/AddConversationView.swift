@@ -34,7 +34,7 @@ struct AddConversationView: View {
                         .frame(width: 16, height: 16)
                 }
                 .buttonStyle(.borderless)
-                .tint(.primary)
+                .tint(.primaryColor)
             }.padding(20)
             Spacer(minLength: 56)
             Text(conversation == nil ? "New Chat" : "Edit Chat")
@@ -45,7 +45,7 @@ struct AddConversationView: View {
                 Text("Chat Name")
             }
             .textFieldStyle(.plain)
-            .tint(.primary.opacity(0.8))
+            .tint(.primaryColor.opacity(0.8))
             .font(.manrope(size: 16, weight: .regular))
             .padding(.init(top: 10, leading: 20, bottom: 10, trailing: 20))
             .frame(height: 50)
@@ -55,6 +55,8 @@ struct AddConversationView: View {
                     .foregroundColor(.gray.opacity(0.1))
             }
             .padding(.horizontal, 20)
+            .onTapGesture {
+            }
 
             Spacer()
                 .frame(height: 20)
@@ -68,7 +70,7 @@ struct AddConversationView: View {
                 if #available(iOS 16.0, *) {
                     TextEditor(text: $prompt)
                         .scrollContentBackground(.hidden)
-                        .tint(.primary.opacity(0.8))
+                        .tint(.primaryColor.opacity(0.8))
                         .padding(.init(top: 10, leading: 16, bottom: 10, trailing: 16))
                         .frame(height: 200)
                         .background {
@@ -77,7 +79,7 @@ struct AddConversationView: View {
                         }
                 } else {
                     TextEditor(text: $prompt)
-                        .tint(.primary.opacity(0.8))
+                        .tint(.primaryColor.opacity(0.8))
                         .padding(.init(top: 10, leading: 16, bottom: 10, trailing: 16))
                         .frame(height: 200)
                         .background {
@@ -93,22 +95,29 @@ struct AddConversationView: View {
             .font(.manrope(size: 16, weight: .regular))
             .foregroundColor(.blackText.opacity(0.8))
             .padding(.horizontal, 20)
+            .onTapGesture {
+            }
 
             Spacer()
                 .frame(height: 36)
             Button(action: { Task { await saveConversation() } }) {
                 Text("Save")
                     .frame(width: 260, height: 50)
-                    .background(title.isEmpty ? .black.opacity(0.1) : .black)
+                    .background(title.isEmpty ? Color.primaryColor.opacity(0.4) : Color.primaryColor)
                     .cornerRadius(25)
-                    .tint(.white)
             }
+            .tint(.whiteText)
             .buttonStyle(.borderless)
             .font(.manrope(size: 20, weight: .medium))
             .disabled(title.isEmpty)
             Spacer(minLength: 56)
         }
         .font(.manrope(size: 16, weight: .regular))
+        .frame(maxWidth: 600)
+        .background(Color.background.ignoresSafeArea())
+        .onTapGesture {
+            endEditing(force: true)
+        }
     }
 
     func saveConversation() async {
@@ -131,5 +140,8 @@ struct AddConversationView: View {
 struct AddConversationView_Previews: PreviewProvider {
     static var previews: some View {
         AddConversationView(onClose: {})
+            .background(Color.background)
+            .environmentObject(AICatStateViewModel())
+            .environment(\.colorScheme, .dark)
     }
 }

@@ -21,6 +21,9 @@ struct ConversationView: View {
     @State var showCommands = false
     @State var commnadCardHeight: CGFloat = 0
     @FocusState var isFocused: Bool
+    @State var toast: Toast?
+    @State var tappedMessageId: String?
+    @State var size: CGSize = .zero
 
     let conversation: Conversation
 
@@ -55,7 +58,7 @@ struct ConversationView: View {
                         onChatsClick()
                     }) {
                         Image(systemName: "bubble.left.and.bubble.right")
-                            .tint(.primary)
+                            .tint(.primaryColor)
                             .frame(width: 24, height: 24)
                     }.buttonStyle(.borderless)
                     Spacer()
@@ -98,7 +101,7 @@ struct ConversationView: View {
                             showClearMesssageAlert = false
                         }
                     }
-                    .tint(.primary)
+                    .tint(.primaryColor)
                 }
                 .padding(.horizontal, 20)
                 .frame(height: 44)
@@ -109,18 +112,42 @@ struct ConversationView: View {
                             Spacer().frame(height: 4)
                                 .id("Top")
                             ForEach(appStateVM.messages, id: \.id) { message in
-                                MessageView(message: message)
-                                    .id(message.id)
-                                    .contextMenu {
-                                        Button(action: {
-                                            SystemUtil.copyToPasteboard(content: message.content)
-                                        }) {
-                                            Label("Copy", systemImage: "doc.on.doc")
+                                MessageView(
+                                    message: message,
+                                    onDelete: {
+                                        HapticEngine.trigger()
+                                        deleteMessage(message)
+                                    },
+                                    onCopy: {
+                                        SystemUtil.copyToPasteboard(content: message.content)
+                                        toast = Toast(type: .info, message: "Message content copied", duration: 1.5)
+                                    },
+                                    onShare: {
+                                        HapticEngine.trigger()
+                                        endEditing(force: true)
+                                        appStateVM.shareMessage(message, imageWidth: size.width)
+                                    },
+                                    showActions: message.id == tappedMessageId
+                                ).onTapGesture {
+                                    HapticEngine.trigger()
+                                    withAnimation {
+                                        if tappedMessageId == message.id {
+                                            tappedMessageId = nil
+                                        } else {
+                                            tappedMessageId = message.id
                                         }
-                                        Button(role: .destructive, action: { deleteMessage(message) }) {
-                                            Label("Delete", systemImage: "trash")
+                                    }
+                                }
+                                .onHover { isHover in
+                                    withAnimation {
+                                        if isHover {
+                                            tappedMessageId = message.id
+                                        } else {
+                                            tappedMessageId = nil
                                         }
-                                    }.id(message.id)
+                                    }
+                                }
+                                .id(message.id)
                             }
                             if let error {
                                 ErrorMessageView(errorMessage: error.localizedDescription) {
@@ -132,16 +159,22 @@ struct ConversationView: View {
                             if isAIGenerating && isSending {
                                 InputingMessageView().id("generating")
                             }
-                            Spacer().frame(height: 100)
+                            Spacer().frame(height: 80)
                                 .id("Bottom")
                         }
                     }
-                    .gesture(DragGesture().onChanged { _ in
+                    .simultaneousGesture(DragGesture().onChanged { _ in
                         self.endEditing(force: true)
                     })
-                    .onChange(of: appStateVM.messages) { _ in
-                        withAnimation {
-                            proxy.scrollTo("Bottom")
+                    .onChange(of: appStateVM.messages) { [old = appStateVM.messages] newMessages in
+                        if old.count <= newMessages.count {
+                            if old.isEmpty {
+                                proxy.scrollTo("Bottom")
+                            } else {
+                                withAnimation {
+                                    proxy.scrollTo("Bottom")
+                                }
+                            }
                         }
                     }
                     .onChange(of: isAIGenerating) { _ in
@@ -198,8 +231,8 @@ struct ConversationView: View {
                     .frame(maxHeight: min(commnadCardHeight, 180))
                     .background(Color.background)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
-                    .shadow(color: .primary.opacity(0.1), radius: 12)
-                    .padding(.horizontal, 20)
+                    .shadow(color: .primaryColor.opacity(0.1), radius: 12)
+                    .padding(.horizontal, 16)
                 }
                 if let selectedPrompt {
                     HStack {
@@ -220,13 +253,19 @@ struct ConversationView: View {
                         .padding(.init(top: 4, leading: 10, bottom: 4, trailing: 6))
                         .background(Color.background)
                         .clipShape(RoundedRectangle(cornerRadius: 16))
-                        .shadow(color: .primary.opacity(0.1), radius: 12)
+                        .shadow(color: .primaryColor.opacity(0.1), radius: 12)
                     }.padding(.horizontal, 20)
                 }
 
                 HStack(alignment: .bottom, spacing: 4) {
                     TextEditView(text: $inputText) {
-                        Text("Say something" + (conversation.isMain ? " or enter 'space'" : ""))
+                        ZStack {
+                            if conversation.isMain {
+                                Text("Say something or enter 'space'")
+                            } else {
+                                Text("Say something")
+                            }
+                        }
                     }
                     .textFieldStyle(.plain)
                     .frame(minHeight: 26)
@@ -244,12 +283,14 @@ struct ConversationView: View {
                     .onSubmit {
                         completeMessage()
                     }
+                    .onTapGesture {}
                     if isSending {
                         Button(action: {
+                            HapticEngine.trigger()
                             CatApi.cancelMessageStream()
                         }) {
                             Rectangle()
-                                .foregroundColor(.primary)
+                                .foregroundColor(.primaryColor)
                                 .frame(width: 17, height: 17)
                                 .cornerRadius(2)
                                 .opacity(0.5)
@@ -260,6 +301,7 @@ struct ConversationView: View {
                     Button(
                         action: {
                             completeMessage()
+                            HapticEngine.trigger()
                         }
                     ) {
                         if isSending {
@@ -273,7 +315,7 @@ struct ConversationView: View {
                                     .frame(width: 26, height: 26)
                                     .tint(
                                         LinearGradient(
-                                            colors: [.primary.opacity(0.9), .primary.opacity(0.6)],
+                                            colors: [.primaryColor.opacity(0.9), .primaryColor.opacity(0.6)],
                                             startPoint: .topLeading,
                                             endPoint: .bottomTrailing)
                                     )
@@ -283,7 +325,7 @@ struct ConversationView: View {
                                     .aspectRatio(contentMode: .fit)
                                     .frame(width: 26, height: 26)
                                     .tint(
-                                        .primary.opacity(0.8)
+                                        .primaryColor.opacity(0.8)
                                     )
                             }
                         }
@@ -299,13 +341,15 @@ struct ConversationView: View {
                 .padding(.trailing, 12)
                 .background(Color.background)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
-                .shadow(color: .primary.opacity(0.1), radius: 4)
+                .shadow(color: .primaryColor.opacity(0.1), radius: 4)
                 .padding(.horizontal, 16)
                 .padding(.bottom, 16)
             }
-        }.task {
+        }
+        .task {
             await appStateVM.queryMessages(cid: conversation.id)
-        }.onChange(of: conversation.id) { newValue in
+        }
+        .onChange(of: conversation.id) { newValue in
             selectedPrompt = nil
             inputText = ""
             error = nil
@@ -327,7 +371,23 @@ struct ConversationView: View {
                 ParamsEditView(conversation: conversation)
             }
         }
+        .background {
+            GeometryReader { proxy in
+                Color.clear
+                    .onAppear {
+                        size = proxy.size
+                    }
+            }
+        }
         .font(.manrope(size: 16, weight: .regular))
+        .toast($toast)
+        .onTapGesture {
+            endEditing(force: true)
+        }
+        .overlay {
+           ShareMessagesImageOverlay()
+        }
+        .toast($appStateVM.saveImageToast)
     }
 
     struct SizeKey: PreferenceKey {
@@ -360,6 +420,9 @@ struct ConversationView: View {
     }
 
     func completeMessage() {
+        if appStateVM.needBuyPremium() {
+            return
+        }
         let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty, !isSending else { return }
         isSending = true
@@ -370,7 +433,9 @@ struct ConversationView: View {
             let chatMessage = ChatMessage(role: "user", content: sendText, conversationId: conversation.id, model: conversation.model)
             await appStateVM.saveMessage(chatMessage)
             await appStateVM.queryMessages(cid: conversation.id)
-            isAIGenerating = true
+            withAnimation {
+                isAIGenerating = true
+            }
             if let selectedPrompt {
                 await completeMessages([newMessage], selected: selectedPrompt, replyToId: chatMessage.id)
             } else {
@@ -412,6 +477,7 @@ struct ConversationView: View {
                 isAIGenerating = false
             }
             isSending = false
+            appStateVM.incrementSentMessageCount()
         } catch {
             let err = error as NSError
             if err.code != -999 {
@@ -430,6 +496,6 @@ struct ConversationView_Previews: PreviewProvider {
         ConversationView(
             conversation: Conversation(title: "Mini Chat", prompt: "hello hello hello hello hello hello hello hello hello hello "),
             onChatsClick: { }
-        )
+        ).environmentObject(AICatStateViewModel())
     }
 }

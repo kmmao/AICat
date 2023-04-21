@@ -19,6 +19,15 @@
       }
     },
     {
+      "identity" : "apphudsdk",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Panl/ApphudSDK.git",
+      "state" : {
+        "branch" : "master",
+        "revision" : "fe07e18107c00f6696df0f5bdc5b41ab62abc4e9"
+      }
+    },
+    {
       "identity" : "blackbird",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/marcoarment/Blackbird",

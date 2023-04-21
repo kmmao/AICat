@@ -6,6 +6,12 @@
 //
 
 import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#endif
+#if canImport(AppKit)
+import AppKit
+#endif
 
 extension View {
 
@@ -21,5 +27,25 @@ extension View {
         } else {
             self
         }
+    }
+
+    func snapshot() async -> ImageType {
+        #if os(iOS)
+        return await MainActor.run {
+            let controller = UIHostingController(rootView: self)
+            let view = controller.view
+            let targetSize = controller.view.intrinsicContentSize
+            view?.bounds = CGRect(origin: .zero, size: targetSize)
+            view?.backgroundColor = .clear
+
+            let renderer = UIGraphicsImageRenderer(size: targetSize)
+
+            return renderer.image { _ in
+                view?.drawHierarchy(in: controller.view.bounds, afterScreenUpdates: true)
+            }
+        }
+        #elseif os(macOS)
+        return await ImageRenderer(contentWithScreenScale: self.environment(\.colorScheme, .dark)).nsImage ?? NSImage()
+        #endif
     }
 }

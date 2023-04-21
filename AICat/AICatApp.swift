@@ -11,6 +11,7 @@ import Foundation
 import AppCenter
 import AppCenterCrashes
 import AppCenterAnalytics
+import ApphudSDK
 
 @main
 struct AICatApp: App {
@@ -24,6 +25,7 @@ struct AICatApp: App {
                 Crashes.self
             ]
         )
+        Apphud.start(apiKey: appHudKey)
     }
 
     var body: some Scene {
@@ -33,8 +35,8 @@ struct AICatApp: App {
                 .task {
                     await appStateVM.queryConversations()
                 }
-                .environmentObject(appStateVM)
                 .background(Color.background.ignoresSafeArea())
+                .environmentObject(appStateVM)
         }
         #elseif os(macOS)
         WindowGroup {
@@ -63,9 +65,9 @@ struct AICatApp: App {
                     .background(Color.background.ignoresSafeArea())
             },
             label: {
-                Image("chatgpt_logo_menu")
+                Image(systemName: "bubble.left.and.bubble.right")
                     .renderingMode(.template)
-                    .foregroundColor(.primary)
+                    .foregroundColor(.primaryColor)
             }
         )
         .menuBarExtraStyle(.window)
