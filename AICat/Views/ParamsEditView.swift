@@ -6,34 +6,64 @@
 //
 
 import SwiftUI
+import ApphudSDK
 
 let contextCounts: [Int] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 50, 100]
-
-let models = [
-    "gpt-3.5-turbo",
-    "gpt-3.5-turbo-0301",
-    "gpt-4",
-    "gpt-4-0314",
-    "gpt-4-32k",
-    "gpt-4-32k-0314"
-]
 
 // https://platform.openai.com/docs/api-reference/completions/create
 
 struct ParamsEditView: View {
 
-    @EnvironmentObject var appStateVM: AICatStateViewModel
+    var isPremium: Bool {
+        UserDefaults.openApiKey != nil || Apphud.hasActiveSubscription()
+    }
+
+    var models: [String] {
+        if isPremium {
+            return [
+                "gpt-3.5-turbo",
+                "gpt-3.5-turbo-0301",
+                "gpt-4",
+                "gpt-4-0314",
+                "gpt-4-32k",
+                "gpt-4-32k-0314"
+            ]
+        } else {
+            return [
+                "gpt-3.5-turbo",
+                "gpt-3.5-turbo-0301"
+            ]
+        }
+    }
 
     @State var conversation: Conversation
-    @State var temperature: Double = 0.7
+    @Binding var show: Bool
 
-    init(conversation: Conversation) {
+    let onUpdate: (Conversation) -> Void
+
+    init(conversation: Conversation, showing: Binding<Bool>, onUpdate: @escaping (Conversation) -> Void) {
         self.conversation = conversation
+        self._show = showing
+        self.onUpdate = onUpdate
     }
 
     var body: some View {
         VStack(spacing: 20) {
+            #if os(macOS)
+            HStack {
+                Spacer()
+                Button(action: {
+                    show = false
+                }) {
+                    Image(systemName: "xmark")
+                        .padding(.horizontal)
+                }
+                .buttonStyle(.plain)
+                .padding(.top, 16)
+            }
+            #elseif os(iOS)
             Spacer()
+            #endif
             HStack {
                 Text("Context Messages")
                     .padding(.leading, 10)
@@ -52,7 +82,7 @@ struct ParamsEditView: View {
                     .stroke(lineWidth: 1)
                     .foregroundColor(.gray.opacity(0.4))
             }
-            .padding(.horizontal, 12)
+            .padding(.horizontal, 16)
             HStack {
                 Text("Model")
                     .padding(.leading, 10)
@@ -71,7 +101,7 @@ struct ParamsEditView: View {
                     .stroke(lineWidth: 1)
                     .foregroundColor(.gray.opacity(0.4))
             }
-            .padding(.horizontal, 12)
+            .padding(.horizontal, 16)
             .padding(.bottom, 8)
             VStack(spacing: 12) {
                 HStack {
@@ -82,7 +112,7 @@ struct ParamsEditView: View {
                 .padding(.horizontal, 12)
                 SliderView(value: $conversation.temperature, sliderRange: 0...2)
                     .frame(height: 20)
-            }.padding(.horizontal, 10)
+            }.padding(.horizontal, 14)
 
             VStack(spacing: 12) {
                 HStack {
@@ -93,7 +123,7 @@ struct ParamsEditView: View {
                 .padding(.horizontal, 12)
                 SliderView(value: $conversation.topP, sliderRange: 0...1)
                     .frame(height: 20)
-            }.padding(.horizontal, 10)
+            }.padding(.horizontal, 14)
 
             VStack(spacing: 12) {
                 HStack {
@@ -104,7 +134,7 @@ struct ParamsEditView: View {
                 .padding(.horizontal, 12)
                 SliderView(value: $conversation.frequencyPenalty, sliderRange: -2...2)
                     .frame(height: 20)
-            }.padding(.horizontal, 10)
+            }.padding(.horizontal, 14)
 
             VStack(spacing: 12) {
                 HStack {
@@ -115,16 +145,13 @@ struct ParamsEditView: View {
                 .padding(.horizontal, 12)
                 SliderView(value: $conversation.presencePenalty, sliderRange: -2...2)
                     .frame(height: 20)
-            }.padding(.horizontal, 10)
+            }.padding(.horizontal, 14)
             Spacer()
         }
-        .padding(.horizontal, 20)
         .font(.manrope(size: 16, weight: .medium))
         .foregroundColor(.blackText)
         .onChange(of: conversation) { newValue in
-            Task {
-                await appStateVM.saveConversation(newValue)
-            }
+            onUpdate(newValue)
         }
     }
 }
@@ -133,7 +160,7 @@ struct ParamsEditView_Previews: PreviewProvider {
     static var previews: some View {
         ZStack {
             Color.background.ignoresSafeArea()
-            ParamsEditView(conversation: Conversation(title: "Main", prompt: ""))
+            ParamsEditView(conversation: Conversation(title: "Main", prompt: ""), showing: .constant(false), onUpdate: { _ in })
         }.environment(\.colorScheme, .light)
     }
 }

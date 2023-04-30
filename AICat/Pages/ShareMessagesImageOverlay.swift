@@ -8,21 +8,29 @@
 import SwiftUI
 
 struct ShareMessagesImageOverlay: View {
-    @EnvironmentObject var appStateVM: AICatStateViewModel
+
+    let shareMessageSnapshot: ImageType?
+    let onClose: () -> Void
+    let onSave: (ImageType) -> Void
+
+    @State var isSharing = false
 
     var body: some View {
         ZStack {
-            if let shareMessagesSnapshot = appStateVM.shareMessagesSnapshot {
+            if let shareMessageSnapshot {
                 Color.black.opacity(0.816)
                     .ignoresSafeArea()
+                    .gesture(
+                        DragGesture()
+                    )
                 VStack(spacing: 0) {
                     #if os(iOS)
-                    Image(uiImage: shareMessagesSnapshot)
+                    Image(uiImage: shareMessageSnapshot)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .padding(16)
                     #elseif os(macOS)
-                    Image(nsImage: shareMessagesSnapshot)
+                    Image(nsImage: shareMessageSnapshot)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .frame(maxWidth: 560)
@@ -30,7 +38,7 @@ struct ShareMessagesImageOverlay: View {
                     #endif
                     HStack(spacing: 20) {
                         Button(action: {
-                            appStateVM.shareMessagesSnapshot = nil
+                            onClose()
                         }) {
                             Image(systemName: "xmark.circle.fill")
                                 .resizable()
@@ -39,7 +47,7 @@ struct ShareMessagesImageOverlay: View {
                         .buttonStyle(.borderless)
                         Button(
                             action: {
-                                appStateVM.saveImageToAlbum(image: shareMessagesSnapshot)
+                                onSave(shareMessageSnapshot)
                             }
                         ) {
                             Image(systemName: "arrow.down.to.line.circle.fill")
@@ -49,13 +57,16 @@ struct ShareMessagesImageOverlay: View {
                         .buttonStyle(.borderless)
                         #if os(iOS)
                         Button(action: {
-                            SystemUtil.shareImage(shareMessagesSnapshot)
+                            isSharing = true
                         }) {
                             Image(systemName: "square.and.arrow.up.circle.fill")
                                 .resizable()
                                 .frame(width: 36, height: 36)
                         }
                         .buttonStyle(.borderless)
+                        .sheet(isPresented: $isSharing) {
+                            ShareSheet(activityItems: [shareMessageSnapshot])
+                        }
                         #endif
                     }
                     .padding(.bottom, 16)
@@ -68,7 +79,6 @@ struct ShareMessagesImageOverlay: View {
 
 struct ShareMessagesImageOverlay_Previews: PreviewProvider {
     static var previews: some View {
-        ShareMessagesImageOverlay()
-            .environmentObject(AICatStateViewModel())
+        ShareMessagesImageOverlay(shareMessageSnapshot: nil, onClose: {}, onSave: { _ in })
     }
 }

@@ -13,6 +13,8 @@
   // open ai
   let openAIKey = "{Your OpenAI API Key}"
   let proxyAPIHost = "https://api.openai.com"
+  let monthlyPremiumId = "monthly premium subscription product id"
+  let catFoodId = "consumable in-app purchase product id"
   ```
   - [AppCenter](https://appcenter.ms/)
   - [AppHud](https://apphud.com/)
@@ -27,7 +29,7 @@
 - [x] Use your own OpenAI API Key
 - [x] Custom API Host
 - [x] Share message as image
-- [ ] Export messages as Markdown
+- [x] Export messages as Markdown
 - [ ] Copy code block
 - [ ] iCloud Sync
 
