@@ -11,6 +11,7 @@ import ComposableArchitecture
 import Blackbird
 import Foundation
 import ApphudSDK
+import Combine
 #if canImport(UIKit)
 import UIKit
 #endif
@@ -38,6 +39,7 @@ struct ConversationFeature: ReducerProtocol {
         var shareSnapshot: ImageType?
         var saveImageToast: Toast?
         var sentMessageCount: Int64 =  NSUbiquitousKeyValueStore.default.longLong(forKey: "AICat.sentMessageCount")
+        var currentContextCount: Int = 0
 
         var promptText: String {
             selectedPrompt?.prompt ?? conversation.prompt
@@ -66,13 +68,21 @@ struct ConversationFeature: ReducerProtocol {
             }
             return false
         }
+
+        var contextMessages: [ChatMessage] {
+            if let index = messages.lastIndex(where: { $0.isNewSession }) {
+                return Array(messages[index...].filter({ !$0.isNewSession }).suffix(conversation.contextMessages))
+            }
+            return messages.suffix(conversation.contextMessages)
+        }
     }
 
     enum Action {
         case queryMessages(cid: String)
         case updateMessages([ChatMessage])
-        case saveMessage(ChatMessage)
+        case upsertMessage(ChatMessage)
         case deleteMessage(ChatMessage)
+        case saveMessage(ChatMessage, Bool)
         case sendMessage
         case retrySend
         case setSending(Bool)
@@ -95,7 +105,8 @@ struct ConversationFeature: ReducerProtocol {
         case setSaveImageToast(Toast?)
         case updateConversation(Conversation)
         case incrementSentMessageCount
-        case  exportToMD
+        case exportToMD
+        case updateContextCount
     }
 
     func reduce(into state: inout State, action: Action) -> EffectTask<Action> {
@@ -108,20 +119,50 @@ struct ConversationFeature: ReducerProtocol {
             }
         case .updateMessages(let messages):
             state.messages = messages
+            state.currentContextCount = state.contextMessages.count
             return .none
-        case .saveMessage(let message):
+        case .upsertMessage(let message):
             if let index = state.messages.firstIndex(where: { $0.id == message.id }) {
                 state.messages[index] = message
             } else {
                 state.messages.append(message)
             }
+            state.messages.sort(by: { $0.timeCreated < $1.timeCreated })
+            if message.isNewSession {
+                state.currentContextCount = state.contextMessages.count
+            }
             return .none
         case .deleteMessage(let message):
             state.messages.removeAll(where: { $0.id == message.id })
+            state.currentContextCount = state.contextMessages.count
             Task {
                 await deleteMessage(message)
             }
+            while let last = state.messages.last, last.isNewSession {
+                if state.messages.count == 1 {
+                    state.messages.removeLast()
+                    Task {
+                        await deleteMessage(last)
+                    }
+                } else {
+                    let count = state.messages.count
+                    let beforeLast = state.messages[count - 2]
+                    if beforeLast.isNewSession {
+                        state.messages.removeLast()
+                        Task {
+                            await deleteMessage(last)
+                        }
+                    } else {
+                        break
+                    }
+                }
+            }
             return .none
+        case .saveMessage(let message, let sync):
+            return .task {
+                await saveMessage(message, needSync: sync)
+                return .upsertMessage(message)
+            }
         case .sendMessage:
             if state.needBuyPremium {
                 state.showPremiumPage = true
@@ -218,24 +259,33 @@ struct ConversationFeature: ReducerProtocol {
         case .exportToMD:
             exportToMD(state: state)
             return .none
+        case .updateContextCount:
+            state.currentContextCount = state.contextMessages.count
+            return .none
         }
     }
 
-    func saveMessage(_ message: ChatMessage) async {
-        await db.upsert(model: message)
+    func saveMessage(_ message: ChatMessage, needSync: Bool) async {
+        if needSync {
+            await DataStore.saveAndSync(message)
+        } else {
+            await DataStore.save(message)
+        }
     }
 
     func deleteMessage(_ message: ChatMessage) async {
         var messageToRemove = message
         messageToRemove.timeRemoved = Date.now.timeInSecond
-        await db.upsert(model: messageToRemove)
+        await DataStore.saveAndSync(messageToRemove)
     }
 
     func cleanMessages(_ messages: [ChatMessage]) async {
-        for var message in messages {
+        let messagesToDelete = messages.map { item in
+            var message = item
             message.timeRemoved = Date.now.timeInSecond
-            await db.upsert(model: message)
+            return message
         }
+        await DataStore.saveAndSync(items: messagesToDelete)
     }
 
     func queryMessages(cid: String) async -> [ChatMessage] {
@@ -251,8 +301,7 @@ struct ConversationFeature: ReducerProtocol {
         await send(.clearInputText)
         let newMessage = Message(role: "user", content: sendText)
         let chatMessage = ChatMessage(role: "user", content: sendText, conversationId: conversation.id, model: conversation.model)
-        await saveMessage(chatMessage)
-        await send(.saveMessage(chatMessage), animation: .default)
+        await send(.saveMessage(chatMessage, false), animation: .default)
         await completeMessage(newMessage: newMessage, state: state, send: send, replyToId: chatMessage.id)
     }
 
@@ -260,21 +309,21 @@ struct ConversationFeature: ReducerProtocol {
         await send(.setCompleteError(nil))
         await send(.setSending(true))
         let newMessage = Message(role: message.role, content: message.content)
-        await completeMessage(newMessage: newMessage, state: state, send: send, replyToId: message.id)
+        await completeMessage(newMessage: newMessage, state: state, send: send, replyToId: message.id, isRetry: true)
     }
 
-    func completeMessage(newMessage: Message, state: State, send: Send<Action>, replyToId: String) async {
+    func completeMessage(newMessage: Message, state: State, send: Send<Action>, replyToId: String, isRetry: Bool = false) async {
         let conversation = state.conversation
         var responseMessage = ChatMessage(role: "assistant", content: "", conversationId: conversation.id)
         responseMessage.replyToId = replyToId
-        await saveMessage(responseMessage)
-        await send(.saveMessage(responseMessage), animation: .default)
+        responseMessage.timeCreated += 1
+        await send(.saveMessage(responseMessage, false), animation: .default)
         do {
             let stream: AsyncThrowingStream<(String, StreamResponse.Delta), Error>
             if let selectedPrompt = state.selectedPrompt {
                 stream = try await CatApi.completeMessageStream(messages: [newMessage], conversation: selectedPrompt)
             } else {
-                let messagesToSend = state.messages.suffix(conversation.contextMessages).map({ Message(role: $0.role, content: $0.content) }) + [newMessage]
+                let messagesToSend = state.contextMessages.map({ Message(role: $0.role, content: $0.content) }) + (isRetry ? [] : [newMessage])
                 stream = try await CatApi.completeMessageStream(messages: messagesToSend, conversation: conversation)
             }
             for try await (model, delta) in stream {
@@ -285,11 +334,13 @@ struct ConversationFeature: ReducerProtocol {
                     responseMessage.content += content
                 }
                 responseMessage.model = model
-                await saveMessage(responseMessage)
-                await send(.saveMessage(responseMessage))
+                responseMessage.timeCreated = Date.now.timeInSecond
+                await send(.saveMessage(responseMessage, false))
             }
+            await send(.saveMessage(responseMessage, true))
             await send(.setSending(false))
             await send(.incrementSentMessageCount)
+            await send(.updateContextCount)
         } catch {
             let err = error as NSError
             if err.code != -999 {
@@ -301,6 +352,7 @@ struct ConversationFeature: ReducerProtocol {
                 }
             }
             await send(.setSending(false))
+            await send(.updateContextCount)
         }
     }
 
@@ -390,6 +442,7 @@ struct ConversationView: View {
     @State var commnadCardHeight: CGFloat = 0
     @FocusState var isFocused: Bool
     @State var size: CGSize = .zero
+    @State var subscription: AnyCancellable?
 
     let store: StoreOf<ConversationFeature>
     let onChatsClick: () -> Void
@@ -467,8 +520,37 @@ struct ConversationView: View {
                             }
                             .padding(.init(top: 4, leading: 10, bottom: 4, trailing: 6))
                             .background(Color.background)
-                            .clipShape(RoundedRectangle(cornerRadius: 16))
+                            .cornerRadius(16)
                             .shadow(color: .primaryColor.opacity(0.1), radius: 12)
+                        }.padding(.horizontal, 20)
+                    } else if viewStore.conversation.contextMessages > 0 {
+                        HStack {
+                            Spacer(minLength: 0)
+                            Button(action: {
+                                if let last = viewStore.messages.last {
+                                    HapticEngine.trigger()
+                                    if last.isNewSession {
+                                        viewStore.send(.deleteMessage(last), animation: .default)
+                                    } else {
+                                        viewStore.send(.saveMessage(ChatMessage.newSession(cid: viewStore.conversation.id), false), animation: .default)
+                                    }
+                                }
+                            }, label: {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "clock.arrow.circlepath")
+                                    Text("\(viewStore.currentContextCount)/\(viewStore.conversation.contextMessages)")
+                                        .lineLimit(1)
+                                        .font(.manrope(size: 14, weight: .semibold))
+                                        .foregroundColor(.blackText.opacity(0.7))
+                                }
+                                .padding(.init(top: 4, leading: 6, bottom: 4, trailing: 12))
+                            })
+                            .background(Color.background)
+                            .cornerRadius(16)
+                            .shadow(color: .primaryColor.opacity(0.1), radius: 12)
+                            .disabled(viewStore.isSending)
+                            .foregroundColor(.blackText.opacity(0.7))
+                            .buttonStyle(.borderless)
                         }.padding(.horizontal, 20)
                     }
 
@@ -564,6 +646,9 @@ struct ConversationView: View {
             }
             .onAppear {
                 viewStore.send(.queryMessages(cid: viewStore.conversation.id))
+                subscription = DataStore.receiveDataFromiCloud.sink {
+                    viewStore.send(.queryMessages(cid: viewStore.conversation.id))
+                }
             }
             .onChange(of: viewStore.conversation.id) { newValue in
                 viewStore.send(.selectPrompt(nil))
