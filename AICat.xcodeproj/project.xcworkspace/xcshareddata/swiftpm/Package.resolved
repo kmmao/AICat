@@ -1,15 +1,6 @@
 {
   "pins" : [
     {
-      "identity" : "alamofire",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/Alamofire/Alamofire.git",
-      "state" : {
-        "revision" : "78424be314842833c04bc3bef5b72e85fff99204",
-        "version" : "5.6.4"
-      }
-    },
-    {
       "identity" : "appcenter-sdk-apple",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/microsoft/appcenter-sdk-apple.git",
@@ -43,6 +34,15 @@
       "state" : {
         "revision" : "882ac01eb7ef9e36d4467eb4b1151e74fcef85ab",
         "version" : "0.9.1"
+      }
+    },
+    {
+      "identity" : "openai",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Panl/OpenAI.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "b3735a07292175b0cb458990aed382557368a897"
       }
     },
     {

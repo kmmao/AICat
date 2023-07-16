@@ -6,88 +6,26 @@
 //
 
 import Foundation
-import Alamofire
-
-struct StreamResponse: Codable {
-    let id: String
-    let object: String
-    let created: Int
-    let model: String
-    let choices: [Choice]
-
-    struct Choice: Codable {
-        let delta: Delta
-        let finishReason: String?
-    }
-
-    struct Delta: Codable {
-        let role: String?
-        let content: String?
-    }
-}
+import OpenAI
+import Combine
 
 enum CatApi {
 
-    static func completeMessageStream(apiKey: String? = nil, messages: [Message], conversation: Conversation) async throws -> AsyncThrowingStream<(String, StreamResponse.Delta), Error> {
-        let key = apiKey ?? UserDefaults.openApiKey ?? openAIKey
-        let headers: HTTPHeaders = [
-            "Content-Type": "application/json",
-            "Authorization": "Bearer \(key)"
-        ]
-        var messageToSend = messages
-        let prompt = conversation.prompt
-        if !prompt.isEmpty {
-            let system = Message(role: "system", content: prompt)
-            messageToSend = [system] + messages
-        }
-        var request = try URLRequest(url: "\(UserDefaults.apiHost)/v1/chat/completions", method: .post, headers: headers)
-        let body = CompleteParams(
-            model: conversation.model,
-            messages: messageToSend,
-            temperature: conversation.temperature,
-            stream: true,
-            topP: conversation.topP,
-            frequencyPenalty: conversation.frequencyPenalty,
-            presencePenalty: conversation.presencePenalty
+    private(set) static var currentStreamOpenAI: OpenAI?
+
+    static var apiClient: OpenAI {
+        let apiKey = UserDefaults.openApiKey ?? openAIKey
+        let apiHost = UserDefaults.apiHost.replacingOccurrences(of: "https://", with: "")
+        let configratuion = OpenAI.Configuration(
+            token: apiKey,
+            host: apiHost,
+            timeoutInterval: 60
         )
-        request.httpBody = try JSONEncoder().encode(body)
-        request.timeoutInterval = 60
-        #if DEBUG
-        print("=====request=====")
-        print(body)
-        print("======")
-        #endif
-        let (result, response) = try await URLSession.shared.bytes(for: request)
-        guard let httpResponse = response as? HTTPURLResponse else { throw NSError(domain: "Invalid response", code: 0) }
-        guard 200...299 ~= httpResponse.statusCode else {
-            var errorText = ""
-            for try await line in result.lines {
-                errorText += line
-            }
-            throw NSError(domain: "Bad response: \(httpResponse.statusCode), \(errorText)", code: 0)
-        }
-        return AsyncThrowingStream<(String, StreamResponse.Delta), Error> { continuation in
-            Task {
-                do {
-                    for try await line in result.lines {
-                        if line.hasPrefix("data: "),
-                           let data = line.dropFirst(6).data(using: .utf8),
-                           let response = decodeResponse(data: data),
-                           let delta = response.choices.first?.delta {
-                            let model = response.model
-                            continuation.yield((model, delta))
-                        }
-                    }
-                    continuation.finish()
-                } catch {
-                    continuation.finish(throwing: error)
-                }
-            }
-        }
+        return OpenAI(configuration: configratuion, session: URLSession.shared)
     }
 
-    static func cancelMessageStream() {
-        cancelTaskWithUrl(URL(string: "\(UserDefaults.apiHost)/v1/chat/completions"))
+    static func cancelStreamChat() {
+        currentStreamOpenAI?.cancelAllStreamingRequests()
     }
 
     static func cancelTaskWithUrl(_ url: URL?) {
@@ -99,143 +37,71 @@ enum CatApi {
         }
     }
 
-    static func decodeResponse(data: Data) -> StreamResponse? {
-        let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
-        do {
-            let response = try decoder.decode(StreamResponse.self, from: data)
-            return response
-        } catch {
-            print("decode error: \(error) - rawJson: \(String(decoding: data, as: UTF8.self))")
-        }
-        return nil
-    }
-
-    static func complete(apiHost: String? = nil, apiKey: String? = nil, messages: [Message]) async -> Result<CompleteResponse, AFError> {
+    static func complete(apiHost: String? = nil, apiKey: String? = nil, messages: [Chat]) async throws -> ChatResult {
         let host = apiHost ?? UserDefaults.customApiHost
         let key = apiKey ?? UserDefaults.openApiKey ?? ""
-        let headers: HTTPHeaders = [
-            "Content-Type": "application/json",
-            "Authorization": "Bearer \(key)"
-        ]
-        return await AF.request(
-            "\(host)/v1/chat/completions",
-            method: .post,
-            parameters: CompleteParams(
-                model: "gpt-3.5-turbo",
-                messages: messages,
-                temperature: 0.7,
-                stream: false,
-                topP: 1,
-                frequencyPenalty: 0,
-                presencePenalty: 0
-            ),
-            encoder: .json,
-            headers: headers,
-            requestModifier: { request in
-                request.timeoutInterval = 60
-            }
+        let configratuion = OpenAI.Configuration(
+            token: key,
+            host: host.replacingOccurrences(of: "https://", with: ""),
+            timeoutInterval: 60
         )
-        .validate(statusCode: 200..<300)
-        .logRequest()
-        .serializingDecodable(CompleteResponse.self)
-        .response
-        .logResponse()
-        .result
+        let client = OpenAI(configuration: configratuion, session: URLSession.shared)
+        let query = ChatQuery(
+            model: "gpt-3.5-turbo",
+            messages: messages,
+            temperature: 0.7,
+            topP: 1,
+            presencePenalty: 0,
+            frequencyPenalty: 0,
+            stream: false
+        )
+        return try await client.chats(query: query)
     }
 
-    static func validate(apiKey: String) async -> Result<CompleteResponse, AFError> {
-        await complete(apiKey: apiKey, messages: [Message(role: "user", content: "say this is a test")])
+    static func validate(apiHost: String, apiKey: String) async throws -> ChatResult {
+        try await complete(apiHost: apiHost, apiKey: apiKey, messages: [Chat(role: .user, content: "say this is a test")])
     }
 
-    static func validate(apiHost: String, apiKey: String) async -> Result<CompleteResponse, AFError> {
-        await complete(apiHost: apiHost, apiKey: apiKey, messages: [Message(role: "user", content: "say this is a test")])
+    static func listGPTModels() async throws -> [Model] {
+        let result = try await apiClient.models()
+        let gptModels = result.data.map({ $0.id }).filter({ $0.contains("gpt") })
+        return gptModels.sorted()
     }
-}
 
-extension Request {
-    func logRequest() -> Self {
-        #if DEBUG
-        cURLDescription { curl in
-            print("====Request Start====")
-            print(curl)
-            print("====Request End====")
+    static func streamChat(messages: [Chat], conversation: Conversation) async -> AsyncThrowingStream<ChatStreamResult, Error> {
+        var messageToSend = messages
+        let prompt = conversation.prompt
+        if !prompt.isEmpty {
+            let system = Chat(role: .system, content: prompt)
+            messageToSend = [system] + messages
         }
-        #endif
-        return self
+        let query = ChatQuery(
+            model: conversation.model,
+            messages: messageToSend,
+            temperature: conversation.temperature,
+            topP: conversation.topP,
+            presencePenalty: conversation.presencePenalty,
+            frequencyPenalty: conversation.frequencyPenalty,
+            stream: true
+        )
+        currentStreamOpenAI = apiClient
+        return currentStreamOpenAI!.chatsStream(query: query)
     }
 }
 
-extension DataResponse {
-    func logResponse() -> Self {
-        #if DEBUG
-        print("====Response Start====")
-        switch result {
-        case .success(let data):
-            print(data)
-        case .failure(let error):
-            print(error)
+extension Chat.Role {
+    init(name: String) {
+        switch name {
+        case "system":
+            self = .system
+        case "user":
+            self = .user
+        case "assistant":
+            self = .assistant
+        case "function":
+            self = .function
+        default:
+            self = .system
         }
-        print("====Response End====")
-        #endif
-        return self
-    }
-}
-
-struct Message: Codable {
-    let role: String
-    let content: String
-}
-
-struct CompleteParams: Codable {
-    let model: String
-    let messages: [Message]
-    let temperature: Double
-    let stream: Bool
-    let topP: Double
-    let frequencyPenalty: Double
-    let presencePenalty: Double
-
-    enum CodingKeys: String, CodingKey {
-        case model = "model"
-        case messages = "messages"
-        case temperature = "temperature"
-        case stream = "stream"
-        case topP = "top_p"
-        case frequencyPenalty = "frequency_penalty"
-        case presencePenalty = "presence_penalty"
-    }
-}
-
-struct CompleteResponse: Codable {
-    let id: String
-    let object: String
-    let created: Int
-    let choices: [Choice]
-    let usage: Usage
-}
-
-struct Choice: Codable {
-    let index: Int
-    let message: Message
-    let finishReason: String
-
-    enum CodingKeys: String, CodingKey {
-        case index
-        case message
-        case finishReason = "finish_reason"
-    }
-
-}
-
-struct Usage: Codable {
-    let promptTokens: Int
-    let completionTokens: Int
-    let totalTokens: Int
-
-    enum CodingKeys: String, CodingKey {
-        case promptTokens = "prompt_tokens"
-        case completionTokens = "completion_tokens"
-        case totalTokens = "total_tokens"
     }
 }

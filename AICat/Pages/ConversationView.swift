@@ -6,12 +6,12 @@
 //
 
 import SwiftUI
-import Alamofire
 import ComposableArchitecture
 import Blackbird
 import Foundation
 import ApphudSDK
 import Combine
+import OpenAI
 #if canImport(UIKit)
 import UIKit
 #endif
@@ -299,41 +299,42 @@ struct ConversationFeature: ReducerProtocol {
         await send(.setSending(true))
         let sendText = text
         await send(.clearInputText)
-        let newMessage = Message(role: "user", content: sendText)
+        let newMessage = Chat(role: .user, content: sendText)
         let chatMessage = ChatMessage(role: "user", content: sendText, conversationId: conversation.id, model: conversation.model)
         await send(.saveMessage(chatMessage, false), animation: .default)
-        await completeMessage(newMessage: newMessage, state: state, send: send, replyToId: chatMessage.id)
+        await streamChat(newMessage: newMessage, state: state, send: send, replyToId: chatMessage.id)
     }
 
     func retry(message: ChatMessage, state: State, send: Send<Action>) async {
         await send(.setCompleteError(nil))
         await send(.setSending(true))
-        let newMessage = Message(role: message.role, content: message.content)
-        await completeMessage(newMessage: newMessage, state: state, send: send, replyToId: message.id, isRetry: true)
+        let newMessage = Chat(role: .init(name: message.role), content: message.content)
+        await streamChat(newMessage: newMessage, state: state, send: send, replyToId: message.id, isRetry: true)
     }
 
-    func completeMessage(newMessage: Message, state: State, send: Send<Action>, replyToId: String, isRetry: Bool = false) async {
+    func streamChat(newMessage: Chat, state: State, send: Send<Action>, replyToId: String, isRetry: Bool = false) async {
         let conversation = state.conversation
         var responseMessage = ChatMessage(role: "assistant", content: "", conversationId: conversation.id)
         responseMessage.replyToId = replyToId
         responseMessage.timeCreated += 1
         await send(.saveMessage(responseMessage, false), animation: .default)
         do {
-            let stream: AsyncThrowingStream<(String, StreamResponse.Delta), Error>
+            let stream: AsyncThrowingStream<ChatStreamResult, Error>
             if let selectedPrompt = state.selectedPrompt {
-                stream = try await CatApi.completeMessageStream(messages: [newMessage], conversation: selectedPrompt)
+                stream = await CatApi.streamChat(messages: [newMessage], conversation: selectedPrompt)
             } else {
-                let messagesToSend = state.contextMessages.map({ Message(role: $0.role, content: $0.content) }) + (isRetry ? [] : [newMessage])
-                stream = try await CatApi.completeMessageStream(messages: messagesToSend, conversation: conversation)
+                let messagesToSend = state.contextMessages.map({ Chat(role: .init(name: $0.role), content: $0.content) }) + (isRetry ? [] : [newMessage])
+                stream = await CatApi.streamChat(messages: messagesToSend, conversation: conversation)
             }
-            for try await (model, delta) in stream {
-                if let role = delta.role {
+            for try await result in stream {
+                let delta = result.choices.first?.delta
+                if let role = delta?.role?.rawValue {
                     responseMessage.role = role
                 }
-                if let content = delta.content {
+                if let content = delta?.content {
                     responseMessage.content += content
                 }
-                responseMessage.model = model
+                responseMessage.model = result.model
                 responseMessage.timeCreated = Date.now.timeInSecond
                 await send(.saveMessage(responseMessage, false))
             }
@@ -585,7 +586,7 @@ struct ConversationView: View {
                             Button(action: {
                                 HapticEngine.trigger()
                                 //TODO: move to reducer
-                                CatApi.cancelMessageStream()
+                                CatApi.cancelStreamChat()
                             }) {
                                 Rectangle()
                                     .foregroundColor(.primaryColor)
