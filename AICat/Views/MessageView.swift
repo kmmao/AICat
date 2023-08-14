@@ -80,7 +80,7 @@ struct AICatMessageView: View {
             InputingMessageView()
         } else if containsCodeBlock(content: message.content) {
             VStack(alignment: .leading, spacing: 0) {
-                Markdown(message.content.trimmingCharacters(in: .whitespacesAndNewlines))
+                Markdown(MarkdownContent(message.content.trimmingCharacters(in: .whitespacesAndNewlines)).renderMarkdown())
                    .textSelection(.enabled)
                    .markdownCodeSyntaxHighlighter(.splash(theme: .sundellsColors(withFont: .init(size: Theme.fontSize))))
                    .markdownTheme(.gitHub.text { FontSize(Theme.fontSize) })
@@ -337,7 +337,7 @@ struct MessageView_Previews: PreviewProvider {
     static var previews: some View {
         VStack(alignment: .leading) {
             Spacer()
-            AICatMessageView(message: ChatMessage(role: "user", content: "you are beautiful", conversationId: ""), showActions: true)
+            AICatMessageView(message: ChatMessage(role: "user", content: "```xml\n you are beautiful\n```", conversationId: ""), showActions: true)
             MineMessageView(message: ChatMessage(role: "", content: "### title ```swift```", conversationId: ""), showActions: true)
             ErrorMessageView(errorMessage: "RequestTime out", retry: {}, clear: {})
             NewSessionMessageView()

@@ -72,6 +72,7 @@
    </AnalyzeAction>
    <ArchiveAction
       buildConfiguration = "Release"
+      customArchiveName = "DdgAI"
       revealArchiveInOrganizer = "YES">
    </ArchiveAction>
 </Scheme>

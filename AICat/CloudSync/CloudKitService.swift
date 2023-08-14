@@ -6,7 +6,7 @@
 //
 
 import CloudKit
-import AppCenterCrashes
+//import AppCenterCrashes
 import Blackbird
 import SwiftUI
 
@@ -33,9 +33,9 @@ final class CloudKitService {
     private let privateDB: CKDatabase
     private let zoneID: CKRecordZone.ID
     private let privateSubscriptionId = "private-changes"
-    private let zoneName = "AICatZone"
+    private let zoneName = "DdgAiZone"
 
-    @AppStorage("AICAT_ZONE_CREATED") var zoneCreated: Bool = false
+    @AppStorage("DDGAI_ZONE_CREATED") var zoneCreated: Bool = false
     @AppStorage("SUBSCRIPTION_CREATED") var subscriptionCreated: Bool = false
 
     init() {

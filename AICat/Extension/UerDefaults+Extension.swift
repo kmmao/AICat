@@ -64,12 +64,13 @@ extension UserDefaults {
             defaults.set(newValue, forKey: "AICat.apiHost")
         }
         get {
-            openApiKey != nil ? (defaults.string(forKey: "AICat.apiHost") ?? "https://api.openai.com") : proxyAPIHost
+//            openApiKey != nil ? (defaults.string(forKey: "AICat.apiHost") ?? "https://api.openai.com") : proxyAPIHost
+            openApiKey != nil ? (defaults.string(forKey: "AICat.apiHost") ?? "https://oneapi.vercel.xycloud.info") : proxyAPIHost
         }
     }
 
     static var customApiHost: String {
-        defaults.string(forKey: "AICat.apiHost") ?? "https://api.openai.com"
+        defaults.string(forKey: "AICat.apiHost") ?? "https://oneapi.vercel.xycloud.info"
     }
 
     static func resetApiHost() {

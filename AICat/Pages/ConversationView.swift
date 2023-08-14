@@ -164,10 +164,10 @@ struct ConversationFeature: ReducerProtocol {
                 return .upsertMessage(message)
             }
         case .sendMessage:
-            if state.needBuyPremium {
-                state.showPremiumPage = true
-                return .none
-            }
+//            if state.needBuyPremium {
+//                state.showPremiumPage = true
+//                return .none
+//            }
             return .run { [state] send in
                 await complete(state: state, send: send)
             }
@@ -372,7 +372,7 @@ struct ConversationFeature: ReducerProtocol {
             let title = conversation.title
             var prompt = conversation.prompt
             if prompt.isEmpty {
-                prompt = "Your ultimate AI assistant"
+                prompt = "dudu piggy - good habits are valuable"
             }
             let width = min(560, imageWidth)
             return ShareMessagesView(title: title, prompt: prompt, messages: messages).frame(width: width)

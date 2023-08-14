@@ -60,7 +60,7 @@ struct PremuimPageReducer: ReducerProtocol {
                 await send(.setIsPurchasing(true))
                 let result = await Apphud.purchase(product)
                 if result.success {
-                    let toast = Toast(type: .success, message: "You get AICat Premium Now!", duration: 2)
+                    let toast = Toast(type: .success, message: "You get DdgAI Premium Now!", duration: 2)
                     await send(.setToast(toast))
                 }
                 if let error = result.error as? NSError {
@@ -79,7 +79,7 @@ struct PremuimPageReducer: ReducerProtocol {
                 let _ = await Apphud.restorePurchases()
                 await send(.setIsPurchasing(false))
                 if state.isPremium {
-                    let toast = Toast(type: .success, message: "You get AICat Premium Now!", duration: 2)
+                    let toast = Toast(type: .success, message: "You get DdgAI Premium Now!", duration: 2)
                     await send(.setToast(toast))
                 } else {
                     let toast = Toast(type: .error, message: "You are not premium user!", duration: 2)
@@ -117,7 +117,7 @@ struct PremiumPage: View {
                     .buttonStyle(.borderless)
                 }
                 Spacer()
-                Text("AICat Premium")
+                Text("DdgAI Premium")
                     .font(.manrope(size: 36, weight: .bold))
                     .fontWeight(.bold)
                     .padding(.top, 20)

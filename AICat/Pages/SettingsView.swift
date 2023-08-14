@@ -59,92 +59,92 @@ struct SettingsView: View {
                             .opacity(0.4)
                     }
                 }.tint(.primaryColor)
-                Section("Donate") {
-                    Button(action: { Task { await buyCatFood() } }) {
-                        HStack {
-                            Label("Buy me a can of cat food", systemImage: "fish")
-                                .labelStyle(.titleAndIcon)
-                            Spacer()
-                            if isPurcahsing {
-                                LoadingIndocator().frame(width: 20, height: 20)
-                            }
-                        }
-                    }.tint(.primaryColor)
-                }.tint(.primaryColor)
-                Section("support") {
-                    Link(destination: URL(string: "https://apps.apple.com/app/aicat-ultimate-ai-assistant/id6446479308?action=write-review")!) {
-                        Label("Review on App Store", systemImage: "star")
-                            .labelStyle(.titleAndIcon)
-                    }
+//                Section("Donate") {
+//                    Button(action: { Task { await buyCatFood() } }) {
+//                        HStack {
+//                            Label("Buy me a can of cat food", systemImage: "fish")
+//                                .labelStyle(.titleAndIcon)
+//                            Spacer()
+//                            if isPurcahsing {
+//                                LoadingIndocator().frame(width: 20, height: 20)
+//                            }
+//                        }
+//                    }.tint(.primaryColor)
+//                }.tint(.primaryColor)
+//                Section("support") {
+//                    Link(destination: URL(string: "https://apps.apple.com/app/aicat-ultimate-ai-assistant/id6446479308?action=write-review")!) {
+//                        Label("Review on App Store", systemImage: "star")
+//                            .labelStyle(.titleAndIcon)
+//                    }
 
-                    Link(destination: URL(string: "https://learnprompting.org/")!) {
-                        Label("Learn Prompting", systemImage: "book")
-                            .labelStyle(.titleAndIcon)
-                    }
-                    Link(destination: URL(string: "https://github.com/f/awesome-chatgpt-prompts")!) {
-                        Label("Awesome prompts", systemImage: "square.stack.3d.up")
-                            .labelStyle(.titleAndIcon)
-                    }
-                    Link(destination: URL(string: "mailto:iplay.coder@gmail.com")!){
-                        Label("Contact Us", systemImage: "envelope.open")
-                            .labelStyle(.titleAndIcon)
-                    }
-                    Link(destination: URL(string: "https://epochpro.app/aicat_privacy")!) {
-                        Label("Privacy Policy", systemImage: "lock.rectangle.on.rectangle")
-                            .labelStyle(.titleAndIcon)
-                    }
-                }.tint(.primaryColor)
-                Section("Social") {
-                    Link(destination: URL(string: "https://t.me/aicatevents")!){
-                        Label("AICat News", image: "telegram_icon")
-                            .labelStyle(.titleAndIcon)
-                    }
-                    Link(destination: URL(string: "https://okjk.co/Cvz2JY")!){
-                        Label("潘磊Rego", image: "jike-logo")
-                            .labelStyle(.titleAndIcon)
-                    }
-                    Link(destination: URL(string: "https://twitter.com/panlei106")!){
-                        Label("Rego", image: "twitter_circled")
-                            .labelStyle(.titleAndIcon)
-                    }
-                    Link(destination: URL(string: "https://www.producthunt.com/products/aicat-ai-assistant-powered-by-chatgpt#aicat-ai-assistant-powered-by-chatgpt")!){
-                        Label("Upvote on Product Hunt", image: "product-hunt-logo")
-                            .labelStyle(.titleAndIcon)
-                    }
-                }.tint(.primaryColor)
-                Section("Source Code") {
-                    Link(destination: URL(string: "https://github.com/Panl/AICat.git")!){
-                        Label("AICat.git", image: "github_icon")
-                            .labelStyle(.titleAndIcon)
-                    }
-                }.tint(.primaryColor)
-                Section(
-                    header: Text("More App"),
-                    footer: HStack {
-                        Spacer()
-                        Text("AICat \(appVersion)(\(buildNumber))")
-                            .font(.manrope(size: 12, weight: .regular))
-                            .padding(12)
-                        Spacer()
-                    }) {
-                        Link(destination: URL(string: "https://apps.apple.com/app/epoch-music-toolkit/id1459345397")!) {
-                            HStack(spacing: 12) {
-                                Image("icon_epoch")
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fill)
-                                    .frame(width: 48, height: 48)
-                                    .cornerRadius(8)
-                                VStack(alignment: .leading) {
-                                    Text("Epoch - Guitar Tuner")
-                                        .font(.manrope(size: 14, weight: .medium))
-                                    Text("Guitar, Bass, Ukulele tuner, Metronome Practice Tracker")
-                                        .font(.manrope(size: 12, weight: .regular))
-                                        .multilineTextAlignment(.leading)
-                                        .foregroundColor(.gray)
-                                }
-                            }.padding(.vertical, 4)
-                        }.tint(.primaryColor)
-                    }
+//                    Link(destination: URL(string: "https://learnprompting.org/")!) {
+//                        Label("Learn Prompting", systemImage: "book")
+//                            .labelStyle(.titleAndIcon)
+//                    }
+//                    Link(destination: URL(string: "https://github.com/f/awesome-chatgpt-prompts")!) {
+//                        Label("Awesome prompts", systemImage: "square.stack.3d.up")
+//                            .labelStyle(.titleAndIcon)
+//                    }
+//                    Link(destination: URL(string: "mailto:iplay.coder@gmail.com")!){
+//                        Label("Contact Us", systemImage: "envelope.open")
+//                            .labelStyle(.titleAndIcon)
+//                    }
+//                    Link(destination: URL(string: "https://epochpro.app/aicat_privacy")!) {
+//                        Label("Privacy Policy", systemImage: "lock.rectangle.on.rectangle")
+//                            .labelStyle(.titleAndIcon)
+//                    }
+//                }.tint(.primaryColor)
+//                Section("Social") {
+//                    Link(destination: URL(string: "https://t.me/aicatevents")!){
+//                        Label("AICat News", image: "telegram_icon")
+//                            .labelStyle(.titleAndIcon)
+//                    }
+//                    Link(destination: URL(string: "https://okjk.co/Cvz2JY")!){
+//                        Label("潘磊Rego", image: "jike-logo")
+//                            .labelStyle(.titleAndIcon)
+//                    }
+//                    Link(destination: URL(string: "https://twitter.com/panlei106")!){
+//                        Label("Rego", image: "twitter_circled")
+//                            .labelStyle(.titleAndIcon)
+//                    }
+//                    Link(destination: URL(string: "https://www.producthunt.com/products/aicat-ai-assistant-powered-by-chatgpt#aicat-ai-assistant-powered-by-chatgpt")!){
+//                        Label("Upvote on Product Hunt", image: "product-hunt-logo")
+//                            .labelStyle(.titleAndIcon)
+//                    }
+//                }.tint(.primaryColor)
+//                Section("Source Code") {
+//                    Link(destination: URL(string: "https://github.com/Panl/AICat.git")!){
+//                        Label("AICat.git", image: "github_icon")
+//                            .labelStyle(.titleAndIcon)
+//                    }
+//                }.tint(.primaryColor)
+//                Section(
+//                    header: Text("More App"),
+//                    footer: HStack {
+//                        Spacer()
+//                        Text("AICat \(appVersion)(\(buildNumber))")
+//                            .font(.manrope(size: 12, weight: .regular))
+//                            .padding(12)
+//                        Spacer()
+//                    }) {
+//                        Link(destination: URL(string: "https://apps.apple.com/app/epoch-music-toolkit/id1459345397")!) {
+//                            HStack(spacing: 12) {
+//                                Image("icon_epoch")
+//                                    .resizable()
+//                                    .aspectRatio(contentMode: .fill)
+//                                    .frame(width: 48, height: 48)
+//                                    .cornerRadius(8)
+//                                VStack(alignment: .leading) {
+//                                    Text("Epoch - Guitar Tuner")
+//                                        .font(.manrope(size: 14, weight: .medium))
+//                                    Text("Guitar, Bass, Ukulele tuner, Metronome Practice Tracker")
+//                                        .font(.manrope(size: 12, weight: .regular))
+//                                        .multilineTextAlignment(.leading)
+//                                        .foregroundColor(.gray)
+//                                }
+//                            }.padding(.vertical, 4)
+//                        }.tint(.primaryColor)
+//                    }
             }
             .frame(minWidth: 300)
             .navigationTitle("Settings")

@@ -15,7 +15,7 @@
 "Message content copied" = "消息内容已复制";
 "Say something" = "说点什么";
 "Say something or enter 'space'" = "说点什么或者输入 'space'";
-"AICat Premium" = "AICat高级版";
+"DdgAI Premium" = "DdgAI高级版";
 "CONVERSATIONS" = "会话";
 "New Chat" = "新建会话";
 "Delete" = "删除";
@@ -63,7 +63,7 @@
 "Auto renewal monthly, cancel at anytime" = "每月自动续订，随时取消";
 "Privacy Policy" = "隐私政策";
 "Terms of Use" = "使用条款";
-"You get AICat Premium Now!" = "您现在获得了 AICat 高级版！";
+"You get DdgAI Premium Now!" = "您现在获得了 DdgAI 高级版！";
 "Purchase failed!" = "购买失败！";
 "You are not premium user!" = "您不是高级版用户！";
 "Context Messages" = "上下文消息";
@@ -85,6 +85,7 @@
 "Image saved!" = "图片保存成功";
 "Save image falied!" = "图片保存失败";
 "Your ultimate AI assistant" = "你的最好的AI伙伴";
+"dudu piggy - good habits are valuable" = "嘟嘟罐，好习惯，有价值";
 "Save your image" = "保存图片";
 "Choose a folder and a name to store the image." = "选择文件夹";
 "Image file name:" = "图片文件名:";

@@ -8,26 +8,26 @@
 import SwiftUI
 import Blackbird
 import Foundation
-import AppCenter
-import AppCenterCrashes
-import AppCenterAnalytics
-import ApphudSDK
+//import AppCenter
+//import AppCenterCrashes
+//import AppCenterAnalytics
+//import ApphudSDK
 
 fileprivate let dbPath = "\(NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0])/db.sqlite"
-let mainConversation = Conversation(id: "AICat.Conversation.Main", title: "AICat Main", prompt: "")
+let mainConversation = Conversation(id: "AICat.Conversation.Main", title: "Dudu Piggy Main", prompt: "")
 let db = try! Blackbird.Database(path: dbPath, options: [])
 
 @main
 struct AICatApp: App {
     init() {
-        AppCenter.start(
-            withAppSecret: appCenterSecretKey,
-            services: [
-                Analytics.self,
-                Crashes.self
-            ]
-        )
-        Apphud.start(apiKey: appHudKey)
+//        AppCenter.start(
+//            withAppSecret: appCenterSecretKey,
+//            services: [
+//                Analytics.self,
+//                Crashes.self
+//            ]
+//        )
+//        Apphud.start(apiKey: appHudKey)
         DataStore.sync(complete: nil)
     }
 

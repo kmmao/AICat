@@ -15,7 +15,7 @@
 "Message content copied" = "メッセージの内容がコピーされました";
 "Say something" = "何か言ってください";
 "Say something or enter 'space'" = "何か言ってくださいまたは 'space' を入力してください";
-"AICat Premium" = "AICatプレミアム";
+"DdgAI Premium" = "DdgAIプレミアム";
 "CONVERSATIONS" = "会話";
 "New Chat" = "新しいチャット";
 "Delete" = "削除する";
@@ -63,7 +63,7 @@
 "Auto renewal monthly, cancel at anytime" = "毎月自動更新、いつでもキャンセル可能";
 "Privacy Policy" = "プライバシーポリシー";
 "Terms of Use" = "利用規約";
-"You get AICat Premium Now!" = "今すぐAICatプレミアムを手に入れよう！";
+"You get DdgAI Premium Now!" = "今すぐDdgAiプレミアムを手に入れよう！";
 "Purchase failed!" = "購入に失敗しました！";
 "You are not premium user!" = "あなたはプレミアムユーザーではありません！";
 "Context Messages" = "コンテキストメッセージ";
@@ -85,6 +85,7 @@
 "Image saved!" = "画像が保存されました！";
 "Save image falied!" = "画像の保存に失敗しました！";
 "Your ultimate AI assistant" = "あなたの究極のAIアシスタント";
+"dudu piggy - good habits are valuable" = "嘟嘟罐，好习惯，有价值";
 "Save your image" = "画像を保存する";
 "Choose a folder and a name to store the image." = "画像を保存するフォルダと名前を選択してください。";
 "Image file name:" = "画像ファイル名：";

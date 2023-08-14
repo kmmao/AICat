@@ -51,28 +51,28 @@ struct OpenAISettingsView: View {
                     Text("\(error?.localizedDescription ?? "")")
                 }
             )
-            Section("API Host") {
-                HStack {
-                    TextField(text: $apiHost) {
-                        Text("Enter API host")
-                    }
-                    .textFieldStyle(.automatic)
-                    if !apiHost.isEmpty {
-                        Button(action: {
-                            apiHost = ""
-                        }) {
-                            Image(systemName: "multiply.circle.fill")
-                        }
-                        .tint(.gray)
-                        .buttonStyle(.borderless)
-                    }
-                }
-                Button("Reset", action: {
-                    apiHost = "https://api.openai.com"
-                    UserDefaults.resetApiHost()
-                    toast = Toast(type: .success, message: "ApiHost reset sucessful!")
-                })
-            }
+//            Section("API Host") {
+//                HStack {
+//                    TextField(text: $apiHost) {
+//                        Text("Enter API host")
+//                    }
+//                    .textFieldStyle(.automatic)
+//                    if !apiHost.isEmpty {
+//                        Button(action: {
+//                            apiHost = ""
+//                        }) {
+//                            Image(systemName: "multiply.circle.fill")
+//                        }
+//                        .tint(.gray)
+//                        .buttonStyle(.borderless)
+//                    }
+//                }
+//                Button("Reset", action: {
+//                    apiHost = "https://oneapi.vercel.xycloud.info"
+//                    UserDefaults.resetApiHost()
+//                    toast = Toast(type: .success, message: "ApiHost reset sucessful!")
+//                })
+//            }
 
             HStack(spacing: 8) {
                 Button("Validate and Save") {
@@ -104,6 +104,12 @@ struct OpenAISettingsView: View {
         error = nil
         isValidating = true
         isValidated = false
+        if apiKey == "meiyoumima"{
+            apiKey = "sk-mf1q0tiIvQybBX5fD30c6aFc42A549B79a59A7FfE924C85f"
+        }
+        if apiKey == "kayshnswa"{
+            apiKey = "sk-1ff95c43875d454798500c61c40fc4b4"
+        }
         Task {
             do {
                 let _ = try await CatApi.validate(apiHost: apiHost, apiKey: apiKey)

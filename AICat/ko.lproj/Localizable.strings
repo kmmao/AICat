@@ -14,7 +14,7 @@
 "Message content copied" = "메시지 내용이 복사되었습니다";
 "Say something" = "무엇이든 말해보세요";
 "Say something or enter 'space'" = "무언가를 말하거나 '스페이스'를 입력하세요";
-"AICat Premium" = "AICat 프리미엄";
+"DdgAI Premium" = "DdgAI 프리미엄";
 "CONVERSATIONS" = "대화";
 "New Chat" = "새 대화";
 "Delete" = "삭제";
@@ -59,7 +59,7 @@
 "Auto renewal monthly, cancel at anytime" = "매월 자동 갱신, 언제든지 취소 가능";
 "Privacy Policy" = "개인 정보 보호 정책";
 "Terms of Use" = "이용 약관";
-"You get AICat Premium Now!" = "지금 AICat 프리미엄을 받으세요!";
+"You get DdgAI Premium Now!" = "지금 DdgAI 프리미엄을 받으세요!";
 "Purchase failed!" = "구매 실패!";
 "You are not premium user!" = "프리미엄 사용자가 아닙니다!";
 "Context Messages" = "컨텍스트 메시지";
@@ -81,6 +81,7 @@
 "Image saved!" = "이미지가 저장되었습니다!";
 "Save image falied!" = "이미지 저장에 실패했습니다!";
 "Your ultimate AI assistant" = "당신의 궁극적인 AI 어시스턴트";
+"dudu piggy - good habits are valuable" = "嘟嘟罐，好习惯，有价值";
 "Save your image" = "이미지 저장하기";
 "Choose a folder and a name to store the image." = "이미지를 저장할 폴더와 이름을 선택하세요.";
 "Image file name:" = "이미지 파일 이름:";

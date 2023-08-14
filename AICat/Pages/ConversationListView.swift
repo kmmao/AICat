@@ -56,7 +56,12 @@ struct ConversationListView: View {
     var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
             VStack(spacing: 0) {
-                Image(systemName: "timelapse")
+//                Image(systemName: "timelapse")
+//                    .resizable()
+//                    .aspectRatio(contentMode: .fit)
+//                    .frame(width: 56, height: 56)
+//                    .padding(.top, 32)
+                Image(uiImage: UIImage(named: "aicat_logo") ?? UIImage())
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 56, height: 56)
@@ -152,40 +157,40 @@ struct ConversationListView: View {
                             viewStore.send(.toggleShowClearAllChats(false))
                         }
                     }
-                    Button(action: {
-                        #if os(iOS)
-                        UIApplication.shared.open(URL(string: "https://help.openai.com/en/collections/3742473-chatgpt")!)
-                        #elseif os(macOS)
-                        NSWorkspace.shared.open(URL(string: "https://help.openai.com/en/collections/3742473-chatgpt")!)
-                        #endif
-                    }) {
-                        HStack {
-                            Image(systemName: "questionmark.circle")
-                            Text("Updates & FAQ")
-                                .lineLimit(1)
-                            Spacer()
-                        }
-                        .padding(.vertical, 10)
-                    }
-                    .buttonStyle(.borderless)
-                    .padding(.horizontal, 20)
-                    .tint(.blackText.opacity(0.5))
-                    Button(
-                        action: { viewStore.send(.toggleShowPremiumPage(true)) }
-                    ) {
-                        HStack {
-                            Image(systemName: "crown")
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(width: 20, height: 20)
-                            Text("AICat Premium")
-                            Spacer()
-                        }
-                        .padding(.vertical, 10)
-                    }
-                    .buttonStyle(.borderless)
-                    .padding(.horizontal, 20)
-                    .tint(.blackText.opacity(0.5))
+//                    Button(action: {
+//                        #if os(iOS)
+//                        UIApplication.shared.open(URL(string: "https://help.openai.com/en/collections/3742473-chatgpt")!)
+//                        #elseif os(macOS)
+//                        NSWorkspace.shared.open(URL(string: "https://help.openai.com/en/collections/3742473-chatgpt")!)
+//                        #endif
+//                    }) {
+//                        HStack {
+//                            Image(systemName: "questionmark.circle")
+//                            Text("Updates & FAQ")
+//                                .lineLimit(1)
+//                            Spacer()
+//                        }
+//                        .padding(.vertical, 10)
+//                    }
+//                    .buttonStyle(.borderless)
+//                    .padding(.horizontal, 20)
+//                    .tint(.blackText.opacity(0.5))
+//                    Button(
+//                        action: { viewStore.send(.toggleShowPremiumPage(true)) }
+//                    ) {
+//                        HStack {
+//                            Image(systemName: "crown")
+//                                .resizable()
+//                                .aspectRatio(contentMode: .fit)
+//                                .frame(width: 20, height: 20)
+//                            Text("DdgAI Premium")
+//                            Spacer()
+//                        }
+//                        .padding(.vertical, 10)
+//                    }
+//                    .buttonStyle(.borderless)
+//                    .padding(.horizontal, 20)
+//                    .tint(.blackText.opacity(0.5))
                     #if os(iOS)
                     Button(action: { viewStore.send(.toggleShowSettings(true)) }) {
                         HStack {
