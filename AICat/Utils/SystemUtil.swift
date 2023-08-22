@@ -19,14 +19,12 @@ typealias ImageType = NSImage
 #endif
 
 enum SystemUtil {
-    static func copyToPasteboard(content: String) -> Bool {
+    static func copyToPasteboard(content: String) {
         #if os(iOS)
         UIPasteboard.general.string = content
-        return true
         #elseif os(macOS)
-        let p = NSPasteboard.general
-        p.declareTypes([.string], owner: nil)
-        return p.setString(content, forType: .string)
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(content, forType: .string)
         #endif
     }
 

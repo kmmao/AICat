@@ -1,25 +1,23 @@
 import MarkdownUI
-import Splash
 import SwiftUI
 
-struct SplashCodeSyntaxHighlighter: CodeSyntaxHighlighter {
-  private let syntaxHighlighter: SyntaxHighlighter<TextOutputFormat>
+struct ChatCodeSyntaxHighlighter: CodeSyntaxHighlighter {
+    let brightMode: Bool
+    let fontSize: Double
 
-  init(theme: Splash.Theme) {
-    self.syntaxHighlighter = SyntaxHighlighter(format: TextOutputFormat(theme: theme))
-  }
-
-  func highlightCode(_ content: String, language: String?) -> Text {
-    guard language?.lowercased() == "swift" else {
-      return Text(content)
+    init(brightMode: Bool, fontSize: Double) {
+        self.brightMode = brightMode
+        self.fontSize = fontSize
     }
 
-    return self.syntaxHighlighter.highlight(content)
-  }
+    func highlightCode(_ content: String, language: String?) -> Text {
+        let content = highlightedCodeBlock(
+            code: content,
+            language: language ?? "",
+            brightMode: brightMode,
+            fontSize: fontSize
+        )
+        return Text(AttributedString(content))
+    }
 }
 
-extension CodeSyntaxHighlighter where Self == SplashCodeSyntaxHighlighter {
-  static func splash(theme: Splash.Theme) -> Self {
-    SplashCodeSyntaxHighlighter(theme: theme)
-  }
-}
