@@ -1,67 +1,67 @@
 {
   "images" : [
     {
-      "filename" : "1024.jpg",
+      "filename" : "资源 2-100.jpg",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
     },
     {
-      "filename" : "16.jpg",
+      "filename" : "资源 8-100.jpg",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "16x16"
     },
     {
-      "filename" : "32.jpg",
+      "filename" : "资源 7-100.jpg",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "16x16"
     },
     {
-      "filename" : "32 1.jpg",
+      "filename" : "资源 7-100 1.jpg",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "32x32"
     },
     {
-      "filename" : "64.jpg",
+      "filename" : "资源 6-100.jpg",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "32x32"
     },
     {
-      "filename" : "128.jpg",
+      "filename" : "资源 5-100.jpg",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "128x128"
     },
     {
-      "filename" : "256.jpg",
+      "filename" : "资源 4-100.jpg",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "128x128"
     },
     {
-      "filename" : "256 1.jpg",
+      "filename" : "资源 4-100 1.jpg",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "256x256"
     },
     {
-      "filename" : "512.jpg",
+      "filename" : "资源 3-100.jpg",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "256x256"
     },
     {
-      "filename" : "512 1.jpg",
+      "filename" : "资源 3-100 1.jpg",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "512x512"
     },
     {
-      "filename" : "1024 1.jpg",
+      "filename" : "资源 2-100 1.jpg",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "512x512"

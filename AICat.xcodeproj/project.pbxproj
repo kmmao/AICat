@@ -47,7 +47,6 @@
 		8EDB8E0D2A127D6A0088517E /* CloudKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDB8E0C2A127D6A0088517E /* CloudKitService.swift */; };
 		8EDB8E0F2A1284540088517E /* PushItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDB8E0E2A1284540088517E /* PushItem.swift */; };
 		8EDB8E112A13DD8F0088517E /* StoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDB8E102A13DD8F0088517E /* StoreManager.swift */; };
-		8EDD4DD429DB0159009176A5 /* Credential.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDD4DD329DB0159009176A5 /* Credential.swift */; };
 		8EE9264729D49B29005E6FB7 /* Bundle+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EE9264629D49B29005E6FB7 /* Bundle+Extension.swift */; };
 		8EECA00629C8097E0021A6A1 /* UerDefaults+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EECA00529C8097E0021A6A1 /* UerDefaults+Extension.swift */; };
 		8EECA00A29C82E9D0021A6A1 /* AddConversationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EECA00929C82E9D0021A6A1 /* AddConversationView.swift */; };
@@ -60,6 +59,7 @@
 		8EF5A5E929E0651A00981A38 /* SliderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF5A5E829E0651A00981A38 /* SliderView.swift */; };
 		8EF5A5EB29E0729B00981A38 /* ParamsEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF5A5EA29E0729B00981A38 /* ParamsEditView.swift */; };
 		8EFE2AB029E14F9C00C64B7C /* TextEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EFE2AAF29E14F9C00C64B7C /* TextEditView.swift */; };
+		9F0D7A912AA3C17300BCFAE5 /* Credential.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F0D7A902AA3C17300BCFAE5 /* Credential.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -105,7 +105,6 @@
 		8EDB8E0C2A127D6A0088517E /* CloudKitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudKitService.swift; sourceTree = "<group>"; };
 		8EDB8E0E2A1284540088517E /* PushItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushItem.swift; sourceTree = "<group>"; };
 		8EDB8E102A13DD8F0088517E /* StoreManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreManager.swift; sourceTree = "<group>"; };
-		8EDD4DD329DB0159009176A5 /* Credential.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Credential.swift; sourceTree = "<group>"; };
 		8EE9264629D49B29005E6FB7 /* Bundle+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Bundle+Extension.swift"; sourceTree = "<group>"; };
 		8EECA00529C8097E0021A6A1 /* UerDefaults+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UerDefaults+Extension.swift"; sourceTree = "<group>"; };
 		8EECA00929C82E9D0021A6A1 /* AddConversationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddConversationView.swift; sourceTree = "<group>"; };
@@ -117,6 +116,7 @@
 		8EF5A5E829E0651A00981A38 /* SliderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SliderView.swift; sourceTree = "<group>"; };
 		8EF5A5EA29E0729B00981A38 /* ParamsEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParamsEditView.swift; sourceTree = "<group>"; };
 		8EFE2AAF29E14F9C00C64B7C /* TextEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditView.swift; sourceTree = "<group>"; };
+		9F0D7A902AA3C17300BCFAE5 /* Credential.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Credential.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -209,7 +209,7 @@
 				8E64872A29C6E1B10029E14F /* Assets.xcassets */,
 				8E2128E829EEFB2700D50ADC /* Localizable.strings */,
 				8E64872C29C6E1B10029E14F /* Preview Content */,
-				8EDD4DD329DB0159009176A5 /* Credential.swift */,
+				9F0D7A902AA3C17300BCFAE5 /* Credential.swift */,
 			);
 			path = AICat;
 			sourceTree = "<group>";
@@ -426,6 +426,7 @@
 				8E2128E329ED7E8800D50ADC /* HapticEngine.swift in Sources */,
 				8E64874229C713D30029E14F /* Conversation.swift in Sources */,
 				8EECA01129C896B20021A6A1 /* Database+Extension.swift in Sources */,
+				9F0D7A912AA3C17300BCFAE5 /* Credential.swift in Sources */,
 				8EDB8E0F2A1284540088517E /* PushItem.swift in Sources */,
 				8E64873529C6E2660029E14F /* ConversationView.swift in Sources */,
 				8E2E5BB029CCC60700EE0072 /* MainView.swift in Sources */,
@@ -442,7 +443,6 @@
 				8EECA01629CA07830021A6A1 /* MessageView.swift in Sources */,
 				8E401DD729EA9E9A00E2F403 /* SKProduct+Extension.swift in Sources */,
 				8EDB8E112A13DD8F0088517E /* StoreManager.swift in Sources */,
-				8EDD4DD429DB0159009176A5 /* Credential.swift in Sources */,
 				8EECA01329C8BC370021A6A1 /* SettingsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
